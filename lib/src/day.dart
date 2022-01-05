@@ -100,14 +100,13 @@ class Day {
     // get timezone (ex: +08)
     String fromTimezone = timezoneReg.stringMatch(time).toString();
 
-    // convert int
-    int fromTimezoneInt = int.tryParse(fromTimezone) ?? 0;
-    // print('fromTimezoneInt: ${fromTimezone}, int: ${fromTimezoneInt}');
-
     // get locale timezone
     int localeTimeoffest = Day().timeZoneOffset.inHours;
-    // print('localeTimeoffest: ${localeTimeoffest}');
 
+    // convert int
+    int fromTimezoneInt = int.tryParse(fromTimezone) ?? localeTimeoffest;
+    // print('fromTimezoneInt: ${fromTimezone}, int: ${fromTimezoneInt}');
+    // print('localeTimeoffest: ${localeTimeoffest}');
 
     _diffOffset = localeTimeoffest - fromTimezoneInt;
     // print('diffOffset: $_diffOffset');
