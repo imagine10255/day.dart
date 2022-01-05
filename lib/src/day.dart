@@ -13,6 +13,8 @@ class Day {
   /// The internal [DateTime] instance of the [Day].
   late DateTime _time;
 
+  int _diffOffset = 0;
+
   /// The values of [_time].
   ///
   /// Include:
@@ -85,7 +87,35 @@ class Day {
   /// final d = Day.fromString('2019-04-30')
   /// ```
   Day.fromString(String time) {
-    _initTime(DateTime.parse(time));
+
+    // timeoffset: 8:00:00.000000 -> +08:00
+    // 目前時間 + (timeoffset - 擷取到的時)
+
+    // +08:00 or +0800
+    RegExp timezoneFullReg = RegExp(r"[\+][\d]{2}\:?[\d]{2}");
+
+    // +08
+    RegExp timezoneReg = RegExp(r"[\+][\d]{2}");
+
+    // get timezone (ex: +08)
+    String fromTimezone = timezoneReg.stringMatch(time).toString();
+
+    // convert int
+    int fromTimezoneInt = int.tryParse(fromTimezone) ?? 0;
+    // print('fromTimezoneInt: ${fromTimezone}, int: ${fromTimezoneInt}');
+
+    // get locale timezone
+    int localeTimeoffest = Day().timeZoneOffset.inHours;
+    // print('localeTimeoffest: ${localeTimeoffest}');
+
+
+    _diffOffset = localeTimeoffest - fromTimezoneInt;
+    // print('diffOffset: $_diffOffset');
+
+    time = time.replaceFirst(timezoneFullReg, '');
+
+    // 加上差異時間
+    _initTime(DateTime.parse(time).add(Duration(hours: _diffOffset)));
   }
 
   /// Constructs a new [Day] from a [DateTime] instance.
@@ -421,6 +451,19 @@ class Day {
 
     return format.replaceAllMapped(RegExp(dayDartRegexpFormat),
         (Match m) => u.processMatchFromFormat(m, this));
+  }
+
+
+  /// 顯示原本時區的時間
+  String tzFormat([String? format]) {
+
+    if (format == null) {
+      return toIso8601String();
+    }
+
+    // 減去差異時區
+    return format.replaceAllMapped(RegExp(dayDartRegexpFormat),
+        (Match m) => u.processMatchFromFormat(m, this.subtract(_diffOffset, 'hour')));
   }
 
   @override
